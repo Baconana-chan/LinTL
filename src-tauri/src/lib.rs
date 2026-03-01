@@ -471,6 +471,7 @@ fn parse_research_context_result(raw: &str) -> Result<ResearchContextResult, Str
     ))
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn request_model_completion(
     provider: &str,
     base_url: &str,
@@ -1324,6 +1325,7 @@ async fn get_model_pricing(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn translate(
     text: String,
     model: String,
@@ -1438,16 +1440,12 @@ fn read_translation_project(path: String) -> Result<TranslationProject, String> 
     project.target_lang = project.target_lang.trim().to_string();
     project.model = project.model.trim().to_string();
     project.memory = project.memory.trim().to_string();
-    project.glossary = project
+    project
         .glossary
-        .into_iter()
-        .filter(|item| !item.original.trim().is_empty() || !item.translated.trim().is_empty())
-        .collect();
-    project.character_cards = project
+        .retain(|item| !item.original.trim().is_empty() || !item.translated.trim().is_empty());
+    project
         .character_cards
-        .into_iter()
-        .filter(|card| !card.name.trim().is_empty())
-        .collect();
+        .retain(|card| !card.name.trim().is_empty());
     project.chapter_archive = project
         .chapter_archive
         .into_iter()
@@ -1483,6 +1481,7 @@ fn write_translation_project(path: String, project: TranslationProject) -> Resul
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn update_memory_summary(
     provider: String,
     base_url: String,
@@ -1534,6 +1533,7 @@ async fn update_memory_summary(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn compress_chapter_to_memory(
     provider: String,
     base_url: String,
@@ -1591,6 +1591,7 @@ async fn compress_chapter_to_memory(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn suggest_glossary_entries(
     provider: String,
     base_url: String,
@@ -1651,6 +1652,7 @@ async fn suggest_glossary_entries(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn edit_translation(
     provider: String,
     base_url: String,
@@ -1708,6 +1710,7 @@ async fn edit_translation(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn suggest_edit_patches(
     provider: String,
     base_url: String,
@@ -1773,6 +1776,7 @@ async fn suggest_edit_patches(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn research_project_context(
     provider: String,
     base_url: String,
