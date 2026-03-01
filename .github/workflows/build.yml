@@ -1,0 +1,94 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+            artifact: lintl-windows
+            upload_glob: src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: appimage
+            artifact: lintl-linux
+            upload_glob: src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            bundles: dmg
+            artifact: lintl-macos
+            upload_glob: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frontend dependencies
+        run: bun install
+
+      - name: Install Linux system dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            pkg-config \
+            build-essential
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build Tauri bundle
+        run: bunx tauri build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          retention-days: 14
+          path: ${{ matrix.upload_glob }}
+          if-no-files-found: error
+
+  release:
+    name: Publish Release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-artifacts
+
+      - name: Publish GitHub release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            dist-artifacts/**/*.exe
+            dist-artifacts/**/*.AppImage
+            dist-artifacts/**/*.dmg
