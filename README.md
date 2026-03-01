@@ -71,3 +71,15 @@ bun run tauri build
 - `src-tauri/` - Rust/Tauri backend
 - `.github/workflows/` - CI/CD pipelines
 - `TODO.md` - roadmap and progress checklist
+
+## Roadmap
+
+See [TODO.md](TODO.md).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE)

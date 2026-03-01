@@ -95,5 +95,58 @@
 - [x] GitHub repo + releases (AppImage, .exe, .dmg)
 - [x] Документация
 
+
 ### Post-release / vNext
-- [ ] Настоящая векторизация RAG (эмбеддинги + vector db + rerank), вместо token-overlap retrieval
+
+#### Core Improvements
+- [ ] Кастомный title bar (Tauri-style, без системного)  
+  → Использовать tauri-plugin-window-customization или react-titlebar; добавить кнопки minimize/maximize/close + интеграцию с tray icon; поддержка drag на всём окне. (2–4 часа)  
+  → Почему: Улучшит эстетику, особенно в dark/oled темах, и сделает app более "нативным" на Windows/macOS.
+
+- [ ] Более user-friendly UI для новичков  
+  → Onboarding-тур (первые 3 запуска: туториал по шагам — "Загрузи файл", "Настрой ключ", "Добавь глоссарий");  
+  → Упрощённый "Wizard Mode" (шаги: 1. Выбери файл, 2. Языки, 3. Модели/агенты, 4. Запусти);  
+  → Tooltips везде (hover на полях: "Что такое temperature?"); пресеты для популярных пар (jp→ru хентай/LN). (5–10 часов)
+
+- [ ] Авто-обновления app (tauri-plugin-updater)  
+  → Проверка на GitHub релизы + silent download/install. (2–3 часа)
+
+- [ ] Multi-project tabs (переключение между проектами без перезагрузки)  
+  → Как в VS Code: tabs для открытых .translation-project. (4–8 часов)
+
+#### Advanced AI Features
+- [ ] Настоящая векторизация RAG (эмбеддинги + vector db + rerank)  
+  → Заменить token-overlap на полноценный: embeddings от Sentence-Transformers (Rust binding через candle или внешний API); хранить в qdrant-rs или sled-vec (локально); rerank с cross-encoder.  
+  → Применять для memory retrieval, glossary suggestions, character relations. (10–20 часов)
+
+- [ ] Пятый агент: "Coordinator/Critic" (вдохновлён Grok 4.20)  
+  → После всех агентов — финальный pass: разрешает конфликты (e.g., Term vs Editor), оценивает качество (self-eval промпт), предлагает alternatives. (5–10 часов)
+
+- [ ] Интеграция с внешними tools (e.g., Tavily/Serper для Search Model)  
+  → Если Perplexity Sonar дорогой — добавить опции для других search APIs; auto-fallback на локальный если offline. (3–6 часов)
+
+- [ ] Multi-iteration refine loop  
+  → Опция "Deep Refine": 2–3 итерации Editor + Term на проблемных чанках (с лимитом). (4–7 часов)
+
+- [ ] Support для multi-modal (image descriptions в новеллах)  
+  → Если epub с иллюстрациями — описывать их через vision-модели (Gemini 3.0 / Claude 4 Vision) и добавлять в текст. (8–15 часов)
+
+#### UX/Accessibility
+- [ ] Customizable shortcuts editor  
+  → UI для смены горячих клавиш (e.g., Ctrl+T → translate). (2–4 часа)
+
+- [ ] Collaborative mode (share project via link/file)  
+  → Экспорт/импорт .translation-project как zip с историей; опционально — sync через GitHub Gist. (5–10 часов)
+
+#### Performance/Tech
+- [ ] GPU acceleration для локального режима (candle-metal для Apple M-series, candle-cuda)  
+  → Ускорить Ollama/locals на 2–5x. (3–7 часов, если hardware-dependent)
+
+- [ ] Caching responses (sled или rocksdb для повторных чанков)  
+  → Если чанк не изменился — брать из cache, экономя токены. (4–6 часов)
+
+- [ ] Mobile build (Tauri Mobile alpha)  
+  → Android/iOS версия для API (без локальных фишек). (10–20+ часов)
+
+- [ ] WASM-sidecar для browser fallback  
+  → Лёгкая веб-версия (без full Tauri, локалки, но с теми же промптами + возможность монетизации). (8–15 часов)
